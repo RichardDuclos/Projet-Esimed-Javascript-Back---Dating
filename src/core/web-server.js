@@ -29,8 +29,8 @@ class WebServer {
     async syncDb() {
         await initializeForeignKey();
         await sequelize.sync({alter : true/*force: true*/});
-        await userRepository.Seed();
-        await personRepository.Seed();
+        //await userRepository.Seed();
+        //await personRepository.Seed();
     }
 
     start() {

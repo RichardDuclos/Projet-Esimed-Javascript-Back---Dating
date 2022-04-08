@@ -50,24 +50,10 @@ const getPersonById = async function (id) {
     });
 }
 
-const Seed =  async () => {
-    let persons = await Person.findAll();
-    if (persons.length === 0) {
-        new Date(2001, 4, 1);
 
-        createPerson(
-            {
-                firstName: "Marie-Amélie",
-                lastName: "Lanoux",
-                gender : "W",
-                birthday: new Date(2003, 0, 8)
-            });
-    }
-}
 module.exports = {
     getPersons,
     getPerson,
-    Seed,
     getPersonById,
     createPerson
     /*

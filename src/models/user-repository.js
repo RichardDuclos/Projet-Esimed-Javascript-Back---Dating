@@ -83,8 +83,6 @@ const deleteUser = async function(id) {
     });
 }*/
 const checkPassword = async function (password, hash){
-    console.log("mdp moi :" + password);
-    console.log("mdp target :" + hash);
     return await bcrypt.compare(password, hash);
 }
 const getUserByEmail = async function (email) {

@@ -128,7 +128,6 @@ userRoutes.route('/:id/persons')
             .withMessage("Veuillez saisir une date d'anniversaire"),
         async (req, res) => {
 
-        console.log(req.body.gender);
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
                 return res.status(400).json({ errors: errors.array() });
@@ -291,7 +290,6 @@ userRoutes.route('/:id/persons/:id_person/meetings')
             if(!person) {
                 return res.status(400).send();
             }
-            console.log(req.body.comment);
             const meeting = await meetingRepository.createMeeting({
                 date : req.body.date,
                 place : req.body.place,
