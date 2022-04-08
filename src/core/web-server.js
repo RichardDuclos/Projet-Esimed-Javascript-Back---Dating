@@ -2,8 +2,14 @@ const express = require('express');
 const { initializeConfigMiddlewares, initializeErrorMiddlwares } = require('./middlewares');
 const userRoutes = require('../controllers/user-routes');
 const authRoutes = require('../controllers/auth-routes');
+const personRoutes = require('../controllers/person-routes');
 const { sequelize } = require('../models/db');
+const bodyParser = require('body-parser');
 const e = require('../models/user.models');
+const initializeForeignKey = require("../models/foreignkey");
+const userRepository = require('../models/user-repository');
+const personRepository = require('../models/person-repository');
+
 class WebServer {
     app = undefined;
     port = 3000;
@@ -11,6 +17,8 @@ class WebServer {
 
     constructor() {
         this.app = express();
+        this.app.use(bodyParser.json({limit : '50mb'}));
+        this.app.use(bodyParser.urlencoded({ extended :true}));
         this.syncDb();
 
         initializeConfigMiddlewares(this.app);
@@ -19,8 +27,10 @@ class WebServer {
     }
 
     async syncDb() {
-        await sequelize.sync();
-
+        await initializeForeignKey();
+        await sequelize.sync({alter : true/*force: true*/});
+        await userRepository.Seed();
+        await personRepository.Seed();
     }
 
     start() {
@@ -34,7 +44,8 @@ class WebServer {
     }
     _initializeRoutes() {
         this.app.use('/users', userRoutes.initializeRoutes());
-        this.app.use('/', authRoutes.initializeRoutes());
+        this.app.use('/auth', authRoutes.initializeRoutes());
+        this.app.use('/persons', personRoutes.initializeRoutes());
     }
 }
 

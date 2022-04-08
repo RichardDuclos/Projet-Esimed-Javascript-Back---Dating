@@ -1,19 +1,33 @@
-const { users }  = require('./db');
 const User = require('./user.models');
+const Person = require('./person.models');
+const Own = require('./own.models');
+const Meeting = require('./meeting.models');
 const bcrypt = require("bcrypt");
-const uuidv4 = require('uuid');
 
 const { sequelize } = require('./db');
 const { Op } = require("sequelize");
-
+require("../models/own.models");
 const getUsers = async function () {
     return await User.findAll({
         attributes: ["id", "firstName", "lastName", "password"]
     });
 }
-const getUserById = function (id) {
-    return User.findAll();
+const getUserById = async function (id) {
+    const e = sequelize.models.Person;
+    return await User.findOne({
+        where: {
+            id:  id
+        },
+        include:
+            [
+                {model : Person,
+                include : {model : Meeting}},
+            ]
+
+
+    });
 }
+/*
 const getUserByFirstName = function (fname) {
     return User.findAll({
         where : {
@@ -22,9 +36,10 @@ const getUserByFirstName = function (fname) {
             }
         }
     });
-}
+}*/
 const createUser = async function (data) {
     const user = data;
+
     if((user.firstName !== undefined) &&
         (user.lastName !== undefined) &&
         (user.password !== undefined)) {
@@ -36,8 +51,10 @@ const createUser = async function (data) {
         await User.create({
             firstName : user.firstName,
             lastName : user.lastName,
+            email : user.email,
             password : user.password,
-            role : user.role
+            role : user.role,
+            birthday : user.birthday
         });
         return true;
     }
@@ -53,7 +70,7 @@ const deleteUser = async function(id) {
 
     return true;
 }
-const updateUser = async function (data) {
+/*const updateUser = async function (data) {
     await User.update({
         firstName: data.firstName,
         lastName : data.lastName,
@@ -64,35 +81,54 @@ const updateUser = async function (data) {
             id: data.id
         }
     });
+}*/
+const checkPassword = async function (password, hash){
+    console.log("mdp moi :" + password);
+    console.log("mdp target :" + hash);
+    return await bcrypt.compare(password, hash);
 }
-const checkPassword = async function (user){
-    let targetUser = getUserByFirstName(user.firstName);
-    if(targetUser === undefined) {
-        return false;
+const getUserByEmail = async function (email) {
+    return await User.findOne({
+        where : {
+            email : email
+        }
+    });
+}
+
+const Seed =  async () => {
+    let users = await User.findAll();
+
+    if(users.length === 0) {
+        new Date(2001, 4, 1);
+        createUser(
+            {
+                "firstName" : "Richard",
+                "email" : "richard.duclos1004@gmail.com",
+                "lastName" : "Duclos",
+                "password" : "Password",
+                "role" : "admin",
+                "birthday" : new Date(2001, 4, 1)
+            });
+        createUser(
+            {
+                "firstName" : "John",
+                "email" : "richard.duclos1004e@gmail.com",
+                "lastName" : "Doe",
+                "password" : "Password",
+                "birthday" : new Date(2003, 1, 8)
+            });
     }
-    return await bcrypt.compare(user.password, targetUser.password);
 }
+
 module.exports = {
     getUsers,
     getUserById,
     createUser,
-    getUserByFirstName,
-    updateUser,
+    /*updateUser,*/
     deleteUser,
-    checkPassword
+    checkPassword,
+    getUserByEmail,
+    Seed
 }
-/*
-createUser(
-    {
-        "firstName" : "Richard",
-        "lastName" : "Duclos",
-        "password" : "Password",
-        "role" : "admin"
-    });
-createUser(
-    {
-        "firstName" : "John",
-        "lastName" : "Doe",
-        "password" : "Password"
-    });
-*/
+
+

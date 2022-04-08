@@ -16,42 +16,60 @@ const { body, validationResult } = require('express-validator')
 
 //LOGIN REQUEST
 authRoute.post('/login',
-    body('firstName').notEmpty(),
+    body('email').notEmpty()
+        .withMessage("Veuillez renseigner votre adresse email"),
     body('password').notEmpty()
+        .withMessage("Veuillez renseigner un mot de passe")
     , async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
     }
-
-    let result = await userRepository.checkPassword(req.body);
+    let user = await userRepository.getUserByEmail(req.body.email);
+    if(user === null) {
+        return res.status(401).send();
+    }
+    let result = await userRepository.checkPassword( req.body.password, user.password);
     if(!result) {
         return res.status(401).send();
     }
-    let user = userRepository.getUserByFirstName(req.body.firstName);
     let token = auth.getJWT(user.id, user.role);
     res.status(200).send(token);
 });
 
+authRoute.get('/token',
+    (req, res) => {
+        res.status(204).send();
+    });
 //CREATE USER
 authRoute.post(
     '/register',
+    body('email').notEmpty()
+        .withMessage("Veuillez renseigner votre adresse email"),
+    body('email').isEmail()
+        .withMessage("Veuillez renseigner une adresse email valide"),
     body('firstName').notEmpty()
-        .withMessage("Prenom requis"),
+        .withMessage("Veuillez renseigner votre prénom"),
     body('lastName').notEmpty()
-    .withMessage("Nom requis"),
+    .withMessage("Veuillez renseignr votre nom"),
+    body('password').notEmpty()
+        .withMessage("Veuillez renseigner un mot de passe"),
     body('password').isLength({ min: 8 })
         .withMessage("Le mot de passe doit faire 8 caractères minimum"),
+    body('birthday').isDate({format : "YYYY-MM-DD"})
+        .withMessage("Veuillez renseigner votre date de naissance"),
 
-    (req, res) => {
-    const errors = validationResult(req);
+    async (req, res) => {
+        console.log(req.body);
+
+        const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
     }
-    if(userRepository.getUserByFirstName(req.body.firstName)) {
+    if(await userRepository.getUserByEmail(req.body.email)) {
         return res.status(405).send();
     }
-    userRepository.createUser(req.body);
+    await userRepository.createUser(req.body);
 
     res.status(201).send();
 });

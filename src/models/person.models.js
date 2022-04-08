@@ -1,18 +1,14 @@
 const { sequelize } = require('./db');
 const { Sequelize, DataTypes } = require('sequelize');
-const Person = require('./person.models');
 const Own = require('./own.models');
 
- const User = sequelize.define('User', {
+const User = require('./user.models');
+
+const Person = sequelize.define('Person', {
     id: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
         primaryKey: true,
-    },
-    email : {
-        type: DataTypes.STRING,
-        unique: true,
-        allowNull: false
     },
     firstName: {
         type: DataTypes.STRING,
@@ -22,21 +18,19 @@ const Own = require('./own.models');
         type: DataTypes.STRING,
         allowNull: false
     },
-    password: {
-        type: DataTypes.STRING,
-        allowNull: false
-
+    gender : {
+        type : DataTypes.STRING
     },
-     role: {
-         type: DataTypes.STRING,
-         allowNull: false,
-         defaultValue : "member"
-     },
-     birthday : {
+    birthday : {
         type: DataTypes.DATEONLY,
-         allowNull: false
-     }
+        allowNull: false
+    },
+    comment :  {
+        type: DataTypes.TEXT,
+        allowNull: true
+    },
 }, {
 
 });
-module.exports = User;
+
+module.exports = Person;

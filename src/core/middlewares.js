@@ -7,12 +7,14 @@ require('dotenv').config()
 const initJWTMiddleware = (app) => {
     app.use(ejwt(
         { secret: process.env.JSWT_SECRETWORD  , algorithms: ['HS256']})
-        .unless({path: ['/login', '/register']}));
+        .unless({path: ['/auth/login', '/auth/register']}));
     }
 
 const initJsonHandlerMiddlware = (app) => app.use(express.json());
 
 const initCorsMiddlware = (app) => app.use(cors());
+
+const initJSONMiddleware = (app) => app.use(express.json());
 
 const initLoggerMiddlware = (app) => {
     app.use((req, res, next) => {
@@ -38,6 +40,7 @@ exports.initializeConfigMiddlewares = (app) => {
     initJsonHandlerMiddlware(app);
     initCorsMiddlware(app);
     initLoggerMiddlware(app);
+    initJSONMiddleware(app);
 }
 
 exports.initializeErrorMiddlwares = (app) => {

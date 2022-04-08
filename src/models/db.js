@@ -1,3 +1,5 @@
 const { Sequelize } = require('sequelize');
 
-exports.sequelize = new Sequelize(`postgres://postgres:password@localhost/tp_node`)
+exports.sequelize = new Sequelize(`postgres://postgres:password@localhost/projet_js_1`, {
+logging: false
+})
